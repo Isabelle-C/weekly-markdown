@@ -1,6 +1,6 @@
 # weekly-markdown
 
-# Creates weekly markdown template
+Creates weekly markdown template! Might be a helpful template for fellow Obsidian users:)
 
 For instance, for week 7 in summer quarter of 2023 which starts on Monday 7/24, we would produce markdown file `23-SM-07 (07-24).md` with the following headings:
 

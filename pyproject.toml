@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "weekly-markdown"
+version = "0.1.0"
+description = ""
+authors = ["Isabelle-C <isabellechen2023@u.northwestern.edu>"]
+readme = "README.md"
+packages = [{include = "python_syntax"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^1.5.3"
+numpy = "^1.24.1"
+notebook = "^6.5.2"
+matplotlib = "^3.7.0"
+mdutils = "^1.6.0"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.22.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

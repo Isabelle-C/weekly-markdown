@@ -2,6 +2,10 @@
 
 Creates weekly markdown template! Might be a helpful template for fellow Obsidian users:)
 
+TODO:
+- [ ] More organized system of tags
+  - [ ] Hidding tags
+
 For instance, for week 7 in summer quarter of 2023 which starts on Monday 7/24, we would produce markdown file `23-SM-07 (07-24).md` with the following headings:
 
 ```

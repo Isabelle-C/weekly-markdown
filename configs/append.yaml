@@ -1,1 +1,2 @@
-append_path: /path/to/all/your/markdown/files
+#append_path: /path/to/all/your/markdown/files
+#task_path: /path/to/all/your/tasks/csv/or/excel/files

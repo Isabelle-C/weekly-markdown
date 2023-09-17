@@ -1,6 +1,6 @@
 # weekly-markdown
 
-Creates weekly markdown template! Might be a helpful template for fellow Obsidian users:)
+Creates weekly markdown template! Might be a helpful template for fellow Obsidian users 😃
 
 # How it works
 For instance, for week 7 in summer quarter of 2023 which starts on Monday 7/24, we would produce markdown file `23-SM-07 (07-24).md` with the following headings:
@@ -35,12 +35,15 @@ action
 
 Step 2: Depending what you would like to do the markdown file, you can specify the following actions:
 - `create`: create new markdown files
-- `append`: append to an existing markdown files (TODO as of 9/8/2023)
+- `append`: append to an existing markdown files
 - `archive`: move existing markdown files to a new folder outside of obsidian vault
 
 Step 3: In the `/configs` folder, you need to specify some file paths.
 - `create.yaml`: Enter `save_path` which is /path/to/save/all/your/markdown/files
-- `append.yaml`: Enter `append_path` which is /path/to/all/your/markdown/files
+- `append.yaml`: Enter 
+    - `append_path` which is /path/to/all/your/markdown/files
+    - `task_path` which is /path/to/all/your/tasks/csv/or/excel/files
+
 - `archive.yaml`: Enter 
     - `original_path` which is /current/path/to/all/your/markdown/files
     - `new_path` which is /path/to/move/all/your/markdown/files

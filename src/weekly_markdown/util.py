@@ -100,9 +100,13 @@ class Util:
         """
         Create task to be appended to markdown file.
         """
-        if tag != None:
-            # assert no space
-            add_task = f"- [ ] #{tag} {name}"
+        if not math.isnan(tag):
+            if " " in tag:
+                raise ValueError("Tag must not contain space")
+            elif tag.isnumeric():
+                raise ValueError("Tag must not be all numbers")
+            else:
+                add_task = f"- [ ] #{tag} {name}"
         else:
             add_task = f"- [ ] {name}"
         return add_task
@@ -127,16 +131,18 @@ class Util:
             print(file_index)
 
         file = all_files[file_index]
-        print(file)
         # append task to file
         with open(file, "r") as f:
             pattern = rf"{date.month:02}-{date.day:02}"
+            original_content = f.read()
             new_content = Util.create_task(name, tag)
-            modified_content = re.sub(pattern, rf"{date.month:02}-{date.day:02}\0\n" + new_content, f.read())
-
-        with open(file, "w") as f:
-            f.write(modified_content)
-        print("----")
+            
+            if re.search(pattern, original_content) is None:
+                raise ValueError("Date is not found in the file")
+            else:
+                modified_content = re.sub(pattern, rf"{date.month:02}-{date.day:02}\0\n" + new_content, original_content)
+                with open(file, "w") as f:
+                    f.write(modified_content)
 
     def run(self):
         if self.action == "create":

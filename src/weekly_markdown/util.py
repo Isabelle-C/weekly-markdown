@@ -100,14 +100,14 @@ class Util:
         """
         Create task to be appended to markdown file.
         """
-        if not math.isnan(tag):
+        if isinstance(tag, str):
             if " " in tag:
                 raise ValueError("Tag must not contain space")
             elif tag.isnumeric():
                 raise ValueError("Tag must not be all numbers")
             else:
                 add_task = f"- [ ] #{tag} {name}"
-        else:
+        elif math.isnan(tag):
             add_task = f"- [ ] {name}"
         return add_task
 

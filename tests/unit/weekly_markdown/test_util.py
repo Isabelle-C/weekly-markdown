@@ -46,3 +46,11 @@ class TestUtil(unittest.TestCase):
 
         self.assertEqual("- [ ] #tag name", name_tag)
         self.assertEqual("- [ ] name", no_tag)
+
+    def test_append_task(self):
+        # Build test data content
+        test_data = {"Date": "9/29/23", "Name": "mock task", "Tag": "mock-tag", "Frequency": None}
+        test_df = pd.DataFrame(test_data)
+
+        find_file_name = ""
+        pass

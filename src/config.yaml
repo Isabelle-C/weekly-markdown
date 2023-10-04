@@ -5,4 +5,4 @@ start_date: "20230918"
 start_week_number: 1
 total_number_of_weeks: 14
 
-action: "append"
+action: "find"

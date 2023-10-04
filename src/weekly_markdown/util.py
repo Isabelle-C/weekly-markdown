@@ -5,6 +5,7 @@ import warnings
 import yaml
 import re
 
+import hashlib
 from mdutils.mdutils import MdUtils
 from mdutils import Html
 import math
@@ -75,26 +76,7 @@ class Util:
             current_week += 1
         return accumulated_files
 
-    def add_recurring_task(self, date, name, tag, path):
-        """
-        Add recurring tasks.
-
-        Parameters
-        ----------
-        date : datetime
-            Date of the task.
-        name : str
-            Name of the task.
-        tag : str
-            Tag of the task.
-        """
-        task_date = date
-
-        while task_date != self.final_day:
-            self.add_one_task(task_date, name, tag, path)
-            current_month = task_date.month
-            task_date = task_date.replace(month=current_month + 1)
-
+    # Helper functions -----------------####
     @staticmethod
     def create_task(name, tag) -> str:
         """
@@ -144,16 +126,89 @@ class Util:
                 with open(file, "w") as f:
                     f.write(modified_content)
 
-    def run(self):
-        if self.action == "create":
-            self.create_data()
-        elif self.action == "archive":
-            self.move_files()
-        elif self.action == "append":
-            self.append_tasks()
-        else:
-            raise ValueError("Invalid action was provided")
+    def add_recurring_task(self, date, name, tag, path):
+        """
+        Add recurring tasks.
 
+        Parameters
+        ----------
+        date : datetime
+            Date of the task.
+        name : str
+            Name of the task.
+        tag : str
+            Tag of the task.
+        """
+        task_date = date
+
+        while task_date != self.final_day:
+            self.add_one_task(task_date, name, tag, path)
+            current_month = task_date.month
+            task_date = task_date.replace(month=current_month + 1)
+
+    # Working!!!! functions -----------------####
+    @staticmethod
+    def annotate_task(input_string):
+        return hashlib.sha1(input_string.encode()).hexdigest()
+
+    def add_annotations(self):
+        """
+        Add annotations to the tasks.
+        """
+        config = self.open_file("./configs/annotate.yaml")
+
+        path = config["file_path"]
+        annotate_path = config["annotate_path"]
+
+        task_names = []
+        task_ids = []
+
+        all_files = self.find_files(path, True)
+
+        pattern = r'- \[ \] (.+)'
+
+        for f in all_files:
+            with open(f, "r") as file:
+                lines = file.readlines()
+
+                modified_lines = []
+                for line in lines:
+                    match = re.match(pattern, line)
+                    
+                    if match:
+                        text = match.group(1).strip()
+                        annotation = Util.annotate_task(text)
+
+                        modified_line = f'- [ ] <span class="task_id">{annotation}</span> {text}\n'
+                        modified_lines.append(modified_line)
+
+                        task_names.append(text)
+                        task_ids.append(str(annotation))
+                    else:
+                        modified_lines.append(line)
+            
+            with open(f, "w") as file:
+                file.writelines(modified_lines)
+            
+        df = pd.DataFrame({'task_id': task_ids, 'task_name': task_names})
+        df.to_csv(annotate_path, escapechar='\\')
+
+    def find_task(self):
+        config = self.open_file("./configs/find.yaml")
+        path = config["file_path"]
+        id = config["id"]
+
+        all_files = self.find_files(path, True)
+
+        for f in all_files:
+            with open(f, "r") as file:
+                lines = file.readlines()
+                for line in lines:
+                    if id in line:
+                        print(line)
+
+
+    # Main functions -----------------####
     def create_data(self):
         """
         Add dates to markdown files.
@@ -226,3 +281,17 @@ class Util:
                 self.add_one_task(date, name, tag, path)
             else:
                 raise ValueError("Frequency must be either NaN or string")
+
+    def run(self):
+        if self.action == "create":
+            self.create_data()
+        elif self.action == "archive":
+            self.move_files()
+        elif self.action == "append":
+            self.append_tasks()
+        elif self.action == "annotate":
+            self.add_annotations()
+        elif self.action == "find":
+            self.find_task()
+        else:
+            raise ValueError("Invalid action was provided")

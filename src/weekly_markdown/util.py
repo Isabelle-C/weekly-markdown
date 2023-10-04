@@ -179,11 +179,14 @@ class Util:
                         text = match.group(1).strip()
                         annotation = Util.annotate_task(text)
 
-                        modified_line = f'- [ ] <span class="task_id">{annotation}</span> {text}\n'
-                        modified_lines.append(modified_line)
+                        if annotation not in line:
+                            modified_line = f'- [ ] {text} <span class="task_id">{annotation}</span> \n'
+                            modified_lines.append(modified_line)
 
-                        task_names.append(text)
-                        task_ids.append(str(annotation))
+                            task_names.append(text)
+                            task_ids.append(str(annotation))
+                        else:
+                            modified_lines.append(line)
                     else:
                         modified_lines.append(line)
             
@@ -192,8 +195,41 @@ class Util:
             
         df = pd.DataFrame({'task_id': task_ids, 'task_name': task_names})
         df.to_csv(annotate_path, escapechar='\\')
+    
+    def add_tag_annotations(self):
+        """
+        Add annotations to the tasks.
+        """
+        config = self.open_file("./configs/annotate.yaml")
 
-    def find_task(self):
+        path = config["file_path"]
+        all_files = self.find_files(path, True)
+
+        pattern = r'- \[ \] (#[^\s]+) (.*)'
+
+        for f in all_files:
+            print(f)
+            with open(f, "r") as file:
+                lines = file.readlines()
+                modified_lines = []
+                for line in lines:
+                    match = re.match(pattern, line)
+                    if match:
+                        tag, rest = match.groups()
+                        annotation = Util.annotate_task(tag)
+                        
+                        if annotation not in rest:
+                            modified_line = f'- [ ] {tag} {rest} <span class="tag_id">{annotation} </span> \n'
+                            
+                            modified_lines.append(modified_line)
+                        else:
+                            modified_lines.append(line)
+                    else:
+                        modified_lines.append(line)
+            with open(f, "w") as file:
+                file.writelines(modified_lines)
+
+    def find_and_delete_task(self):
         config = self.open_file("./configs/find.yaml")
         path = config["file_path"]
         id = config["id"]
@@ -201,11 +237,17 @@ class Util:
         all_files = self.find_files(path, True)
 
         for f in all_files:
+            # Read the lines from the file
             with open(f, "r") as file:
                 lines = file.readlines()
-                for line in lines:
-                    if id in line:
-                        print(line)
+
+            # Filter out lines that contain the id to remove
+            lines = [line for line in lines if id not in line]
+
+            # Write the filtered lines back to the file
+            with open(f, "w") as file:
+                file.writelines(lines)
+
 
 
     # Main functions -----------------####
@@ -290,7 +332,7 @@ class Util:
         elif self.action == "append":
             self.append_tasks()
         elif self.action == "annotate":
-            self.add_annotations()
+            self.add_tag_annotations()
         elif self.action == "find":
             self.find_task()
         else:

@@ -126,7 +126,7 @@ class Util:
                 with open(file, "w") as f:
                     f.write(modified_content)
 
-    def add_recurring_task(self, date, name, tag, path):
+    def add_recurring_task(self, date, name, tag, path, freq):
         """
         Add recurring tasks.
 
@@ -138,13 +138,22 @@ class Util:
             Name of the task.
         tag : str
             Tag of the task.
+        path : str
+            Path to the file.
+        freq : str
+            Frequency of the task.
         """
         task_date = date
 
-        while task_date != self.final_day:
+        while not (task_date > self.final_day):
             self.add_one_task(task_date, name, tag, path)
-            current_month = task_date.month
-            task_date = task_date.replace(month=current_month + 1)
+            if freq == 'monthly':
+                current_month = task_date.month
+                task_date = task_date.replace(month=current_month + 1)
+            elif freq == 'weekly':
+                task_date = task_date + timedelta(days=7)
+            elif freq == 'every other week':
+                task_date = task_date + timedelta(days=14)
 
     # Working!!!! functions -----------------####
     @staticmethod
@@ -318,7 +327,7 @@ class Util:
             freq = row["Frequency"]
             
             if isinstance(freq, str):
-                self.add_recurring_task(date, name, tag, path)
+                self.add_recurring_task(date, name, tag, path, freq.lower())
             elif math.isnan(freq):
                 self.add_one_task(date, name, tag, path)
             else:

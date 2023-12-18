@@ -1,10 +1,10 @@
 from flask import Flask, render_template, url_for, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from sqlalchemy import inspect
+from sqlalchemy import inspect, extract
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/isabellechen/git-repos/weekly-markdown/test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/isabellechen/git-repos/weekly-markdown/tasks.db'
 db = SQLAlchemy(app)
 
 with app.app_context():
@@ -23,10 +23,22 @@ class Todo(db.Model):
     tag = db.Column(db.String(200), nullable=True)
     due_date = db.Column(db.DateTime, nullable=True)
     priority = db.Column(db.Integer, nullable=True)
+    done=db.Column(db.Boolean, default=False)
+    done_timestamp = db.Column(db.DateTime)
 
     def __repr__(self):
         return '<Task %r>' % self.id
 
+@app.route('/update_done/<int:task_id>', methods=['POST'])
+def update_done(task_id):
+    task = Todo.query.get_or_404(task_id)
+    task.done = request.form.get('done') == 'true'
+    if task.done:
+        task.done_timestamp = datetime.utcnow()
+    else:
+        task.done_timestamp = None
+    db.session.commit()
+    return '', 204
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -52,10 +64,24 @@ def index():
             return 'There was an issue adding your task'
 
     else:
-        tasks = tasks = Todo.query.order_by(Todo.due_date).all()
+        tasks = Todo.query.filter(Todo.done == False).order_by(Todo.due_date).all()
         unique_tags = db.session.query(Todo.tag).distinct().all()
-        return render_template('index.html', tasks=tasks, unique_tags=unique_tags)
+        now = datetime.utcnow()
+        task_weeks = {(task.due_date.date().year, task.due_date.isocalendar()[1]) for task in tasks}
+        return render_template('index.html', tasks=tasks, unique_tags=unique_tags, now=now, task_weeks=task_weeks)
 
+from dateutil.relativedelta import relativedelta, MO
+
+@app.route('/week/<int:year>/<int:week>')
+def week(year, week):
+    start = datetime.strptime(f'{year}-W{int(week )}-1', "%Y-W%W-%w").date()
+    end = start + relativedelta(days=+7)
+    now = datetime.utcnow()
+    tasks = Todo.query.filter(Todo.due_date.between(start, end)).order_by(Todo.due_date).all()
+
+    all_tasks = Todo.query.filter(Todo.done == False).order_by(Todo.due_date).all()
+    task_weeks = {(task.due_date.date().year, task.due_date.isocalendar()[1]) for task in all_tasks}
+    return render_template('week.html', tasks=tasks, task_week=week, task_year=year, now=now, task_weeks=task_weeks)
 
 @app.route('/delete/<int:id>')
 def delete(id):

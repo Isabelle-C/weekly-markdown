@@ -1,51 +1,18 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>Isabelle's Workspace!</title>
+<title>Task Master</title>
 {% endblock %}
 
 {% block body %}
 <div class="content">
-    <button id="nav-toggle">Toggle Nav</button>
-    
-    <h1 style="text-align: center">Isabelle's Workspace!</h1>
+<button id="nav-toggle"> Toggle Nav </button>
+<button id="home"> Home </button>
 
-    <div class="form">
-        <form action="/" method="POST">
-            <label for="task_name">Task Name</label>
-            <input type="text" name="task_name" id="task_name">
-            <br>
-            <label for="tag">Tag</label>
-            <input list="tags" name="tag" id="tag">
-            <datalist id="tags">
-                {% for tag in unique_tags %}
-                    <option value="{{ tag[0] }}">{{ tag[0] }}</option>
-                {% endfor %}
-            </datalist>
-            <br>
-            <label for="due_date">Due Date</label>
-            <input type="date" name="due_date" id="due_date">
-            <br>
-            <label for="priority">Priority</label>
-            <select name="priority" id="priority">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="urgent">Urgent</option>
-            </select>
-            <br>
-            <input type="submit" value="Add Task">
-        </form>
-    </div>
-    
-    <br>
 {% if tasks|length < 1 %}
     <h4 style="text-align: center">There are no tasks. Create one below!</h4>
 {% else %}
-    {% set current_week = now.isocalendar()[1] %}
-    {% set next_week = current_week + 1 %}
-
-    {% set ns = namespace(displayed_week=0) %}
+    <h2> {{ task_year }} Week {{ task_week }}</h2>
     <table>
         <tr>
             <th>Done?</th>
@@ -55,14 +22,8 @@
             <th>Due Date</th>
             <th>Time Elapsed</th>
         </tr>
-    {% for task in tasks %}
-        {% set task_week = task.due_date.isocalendar()[1] %}
-        {% if task_week <= current_week or task_week == next_week %}
+        {% for task in tasks %}
             {% if not task.done %}
-                {% if task_week != ns.displayed_week and task_week>=current_week%}
-                    <h2> {{ task.due_date.date().year }} Week {{ task_week }}</h2>
-                    {% set ns.displayed_week = task_week %}
-                {% endif %}
                 <tr>
                     <td>
                         <input type="checkbox" class="task-checkbox" data-task-id="{{ task.id }}" {% if task.done %}checked{% endif %}>
@@ -86,16 +47,14 @@
                         <a href="/update/{{task.id}}">Update</a>
                     </td>
                 </tr>
-
             {% endif %}
-        {% endif %}
-    {% endfor %}
+        {% endfor %}
     </table>
 {% endif %}
 
 </div>
 
-<nav>
+<nav class="show-by-default">
     {% for year in range(now.year, now.year + 2) %}
         {% for week in range(1, 53) %}
             {% if (year, week) in task_weeks %}

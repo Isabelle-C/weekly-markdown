@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Isabelle's Workspace!</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1 style="text-align: center">Isabelle's Workspace!</h1>
+
+    <div class="form">
+        <form action="/" method="POST">
+            <label for="task_name">Task Name</label>
+            <input type="text" name="task_name" id="task_name">
+            <br>
+            <label for="tag">Tag</label>
+            <input list="tags" name="tag" id="tag">
+            <datalist id="tags">
+                {% for tag in unique_tags %}
+                    <option value="{{ tag[0] }}">{{ tag[0] }}</option>
+                {% endfor %}
+            </datalist>
+            <br>
+            <label for="due_date">Due Date</label>
+            <input type="date" name="due_date" id="due_date">
+            <br>
+            <label for="priority">Priority</label>
+            <select name="priority" id="priority">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+            </select>
+            <br>
+            <input type="submit" value="Add Task">
+        </form>
+    </div>
+    
+    <br>
+    {% if tasks|length < 1 %}
+        <h4 style="text-align: center">There are no tasks. Create one below!</h4>
+    {% else %}
+        {% for task in tasks %}
+            {% set task_week = task.due_date.isocalendar()[1] %}
+            <h2> {{ task.due_date.date().year }} Week {{ task_week }}</h2>
+            <table>
+                <tr>
+                    <th>Task Name</th>
+                    <th>Tag</th>
+                    <th>Priority</th>
+                    <th>Due Date</th>
+                </tr>
+                
+                <tr>
+                    <td>{{ task.task_name }}</td>
+                    <td>{{ task.tag }}</td>
+                    <td>{{ task.priority }}</td>
+                    <td>{{ task.due_date.date() }}</td>
+                    <td>
+                        <a href="/delete/{{task.id}}">Delete</a>
+                        <br>
+                        <a href="/update/{{task.id}}">Update</a>
+                    </td>
+                </tr>
+            </table>
+        {% endfor %}
+    {% endif %}
+
+</div>
+{% endblock %}

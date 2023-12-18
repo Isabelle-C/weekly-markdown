@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Task Master</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+<button id="nav-toggle"> Toggle Nav </button>
+<button id="home"> Home </button>
+
+{% if tasks|length < 1 %}
+    <h4 style="text-align: center">There are no tasks. Create one below!</h4>
+{% else %}
+    <h2> {{ task_year }} Week {{ task_week }}</h2>
+    <table>
+        <tr>
+            <th>Done?</th>
+            <th>Task Name</th>
+            <th>Tag</th>
+            <th>Priority</th>
+            <th>Due Date</th>
+            <th>Time Elapsed</th>
+        </tr>
+        {% for task in tasks %}
+            {% if not task.done %}
+                <tr>
+                    <td>
+                        <input type="checkbox" class="task-checkbox" data-task-id="{{ task.id }}" {% if task.done %}checked{% endif %}>
+                    </td>
+                    <td>{{ task.task_name }}</td>
+                    <td>{{ task.tag }}</td>
+                    <td>{{ task.priority }}</td>
+                    <td>{{ task.due_date.strftime('%Y-%m-%d (%a)') }}</td>
+                    {% if (task.due_date - now).days+1 < 0 %}
+                    {% if -1*((task.due_date - now).days +1) == 1%}
+                        <td> 1 day</td>
+                    {% else %}
+                        <td>{{ -1*((task.due_date - now).days +1) }} days</td>
+                    {% endif %}
+                    {% else %}
+                        <td>  </td>
+                    {% endif %}
+                    <td>
+                        <a href="/delete/{{task.id}}">Delete</a>
+                        <br>
+                        <a href="/update/{{task.id}}">Update</a>
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+{% endif %}
+
+</div>
+
+<nav class="show-by-default">
+    {% for year in range(now.year, now.year + 2) %}
+        {% for week in range(1, 53) %}
+            {% if (year, week) in task_weeks %}
+                <a href="/week/{{ year }}/{{ week }}">Week {{ week }}, {{ year }}</a>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+</nav>
+
+{% endblock %}

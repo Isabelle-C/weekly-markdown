@@ -9,6 +9,7 @@ import hashlib
 from mdutils.mdutils import MdUtils
 from mdutils import Html
 import math
+import markdown_it
 import pandas as pd
 
 from datetime import datetime, timedelta
@@ -76,6 +77,20 @@ class Util:
             current_week += 1
         return accumulated_files
 
+    def find_file_index(self, date) -> int:
+        # subtract date from original date
+        datediff = (date - self.start_date).days
+        # result/7 - 1 = index from find all files
+        if datediff < 0:
+            raise ValueError("Date is before the start date")
+        elif datediff == 0:
+            file_index = 0
+            return file_index
+        else:
+            file_index = datediff // 7
+            return file_index
+        
+        
     # Helper functions -----------------####
     @staticmethod
     def create_task(name, tag) -> str:
@@ -93,24 +108,85 @@ class Util:
             add_task = f"- [ ] {name}"
         return add_task
 
+    def move_task(self):
+        """
+        Move task from one date to another.
+        """
+
+        config = self.open_file("./configs/append.yaml")
+
+        path = config["append_path"]
+        today = datetime.now()
+        yesterday = today - timedelta(days=1)
+
+
+        all_files = self.find_files(path, True)
+
+        current_file_index = self.find_file_index(today)
+        previous_file_index = self.find_file_index(yesterday)
+
+        new_file = all_files[current_file_index]
+        file = all_files[previous_file_index]
+
+        md = markdown_it.MarkdownIt()
+        md_content = ''
+
+        print(file)
+        print(new_file)
+
+        # append task to file
+        with open(file, "r") as f:
+            for line in f:
+                # Append each line to the md_content string
+                md_content += line
+
+        # Parse the Markdown text
+        tokens = md.parse(md_content)
+
+        # Initialize a flag to check if we are inside the desired header
+        inside_desired_header = False
+
+        # Initialize an empty string to store the extracted text
+        extracted_text = ""
+
+        for token in tokens:
+            if token.type == "heading_open" and token.tag == "h1":
+                header_content = tokens[tokens.index(token) + 1].content
+                if f"{yesterday.month:02}-{yesterday.day:02}" in header_content :
+                    inside_desired_header = True
+                else:
+                    inside_desired_header = False
+
+            elif inside_desired_header:
+                extract_i = f"{tokens[tokens.index(token) + 1].content}\n"
+                print(extract_i)
+                print(tokens[tokens.index(token) + 1].tag)
+                if '[ ]' in extract_i:
+                    extracted_text += f"- {extract_i}"
+                
+                elif tokens[tokens.index(token) + 1].tag == 'code':
+                    extracted_text += f"```{extract_i}```\n"
+
+        # Write the extracted text to the new file
+        with open(new_file, "r") as k:
+            pattern = rf"{today.month:02}-{today.day:02}"
+            original_content = k.read()
+            
+            if re.search(pattern, original_content) is None:
+                raise ValueError("Date is not found in the file")
+            else:
+                modified_content = re.sub(pattern, rf"{today.month:02}-{today.day:02}\0\n" + extracted_text, original_content)
+                with open(new_file, "w") as f:
+                    f.write(modified_content)
+
+
     def add_one_task(self, date, name, tag, path):
         """
         Find the file for appending data and and task.
         """
 
         all_files = self.find_files(path, True)
-
-        # subtract date from original date
-        datediff = (date - self.start_date).days
-        print(datediff)
-        # result/7 - 1 = index from find all files
-        if datediff < 0:
-            raise ValueError("Date is before the start date")
-        elif datediff == 0:
-            file_index = 0
-        else:
-            file_index = datediff // 7
-            print(file_index)
+        file_index = self.find_file_index(self, date)
 
         file = all_files[file_index]
         # append task to file
@@ -257,8 +333,6 @@ class Util:
             with open(f, "w") as file:
                 file.writelines(lines)
 
-
-
     # Main functions -----------------####
     def create_data(self):
         """
@@ -344,5 +418,7 @@ class Util:
             self.add_tag_annotations()
         elif self.action == "find":
             self.find_task()
+        elif self.action == "move":
+            self.move_task()
         else:
             raise ValueError("Invalid action was provided")

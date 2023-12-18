@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block head %}{% endblock %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('.task-checkbox').change(function() {
+            var taskId = $(this).data('task-id');
+            var done = $(this).is(':checked');
+            $.post('/update_done/' + taskId, {done: done});
+        });
+    });
+    </script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    {% block body %}{% endblock %}
+    <script>
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+        var nav = document.querySelector('nav');
+        if (nav.style.left === '0px') {
+            nav.style.left = '-200px';
+        } else {
+            nav.style.left = '0px';
+        }
+    });
+    
+    document.getElementById('home').addEventListener('click', function() {
+        window.location.href = '/';
+    });
+    </script>
+</body>
+</html>

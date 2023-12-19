@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from "macros.html" import render_task with context %}
 
 {% block head %}
 <title>Isabelle's Workspace!</title>
@@ -7,8 +8,27 @@
 {% block body %}
 <div class="content">
     <button id="nav-toggle">Toggle Nav</button>
-    
+    <form action="/clear_database" method="POST">
+        <button id="clear-db" type="submit">Clear Database</button>
+    </form>
+
     <h1 style="text-align: center">Isabelle's Workspace!</h1>
+
+    <form method="POST" action="/set_timezone">
+        <select name="timezone">
+            {% for tz in timezones %}
+            <option value="{{ tz }}">{{ tz }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Set Timezone">
+    </form>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-success">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+    {% endwith %}
 
     <div class="form">
         <form action="/" method="POST">
@@ -39,61 +59,48 @@
     </div>
     
     <br>
-{% if tasks|length < 1 %}
-    <h4 style="text-align: center">There are no tasks. Create one below!</h4>
-{% else %}
-    {% set current_week = now.isocalendar()[1] %}
-    {% set next_week = current_week + 1 %}
+    {% if tasks|length < 1 %}
+        <h4 style="text-align: center">There are no tasks. Create one below!</h4>
+    {% else %}
+        {% set current_week = now.isocalendar()[1] %}
+        {% set next_week = current_week + 1 %}
 
-    {% set ns = namespace(displayed_week=0) %}
-    <table>
-        <tr>
-            <th>Done?</th>
-            <th>Task Name</th>
-            <th>Tag</th>
-            <th>Priority</th>
-            <th>Due Date</th>
-            <th>Time Elapsed</th>
-        </tr>
-    {% for task in tasks %}
-        {% set task_week = task.due_date.isocalendar()[1] %}
-        {% if task_week <= current_week or task_week == next_week %}
-            {% if not task.done %}
-                {% if task_week != ns.displayed_week and task_week>=current_week%}
-                    <h2> {{ task.due_date.date().year }} Week {{ task_week }}</h2>
+        {% set current_year = now.year %}
+
+        {% set ns = namespace(displayed_week=0) %}
+
+        {% for task in tasks %}
+            {% set task_week = task.due_date.isocalendar()[1] %}
+            {% set task_year = task.due_date.date().year %}
+            {% if (not task.done) %}
+                {% if task_week != ns.displayed_week %}
+                    {% if ns.displayed_week != 0 %}
+                        </table>
+                    {% endif %}
+
+                    {% if task_year <= current_year and (task_week<=current_week or task_week==next_week)%}
+
+                    <h2> {{ task_year }} Week {{ task_week }}</h2>
+
+                    <table>
+                        <tr>
+                            <th>Done?</th>
+                            <th>Task Name</th>
+                            <th>Tag</th>
+                            <th>Priority</th>
+                            <th>Due Date</th>
+                            <th>Time Elapsed</th>
+                        </tr>
+                        {{ render_task(task, now) }}
+                    {% endif %}
+                        
                     {% set ns.displayed_week = task_week %}
+                {% else %}
+                    {{ render_task(task, now) }}
                 {% endif %}
-                <tr>
-                    <td>
-                        <input type="checkbox" class="task-checkbox" data-task-id="{{ task.id }}" {% if task.done %}checked{% endif %}>
-                    </td>
-                    <td>{{ task.task_name }}</td>
-                    <td>{{ task.tag }}</td>
-                    <td>{{ task.priority }}</td>
-                    <td>{{ task.due_date.strftime('%Y-%m-%d (%a)') }}</td>
-                    {% if (task.due_date - now).days+1 < 0 %}
-                    {% if -1*((task.due_date - now).days +1) == 1%}
-                        <td> 1 day</td>
-                    {% else %}
-                        <td>{{ -1*((task.due_date - now).days +1) }} days</td>
-                    {% endif %}
-                    {% else %}
-                        <td>  </td>
-                    {% endif %}
-                    <td>
-                        <a href="/delete/{{task.id}}">Delete</a>
-                        <br>
-                        <a href="/update/{{task.id}}">Update</a>
-                    </td>
-                </tr>
-
             {% endif %}
-        {% endif %}
-    {% endfor %}
-    </table>
-{% endif %}
-
-</div>
+        {% endfor %}
+    {% endif %}
 
 <nav>
     {% for year in range(now.year, now.year + 2) %}
@@ -103,6 +110,8 @@
             {% endif %}
         {% endfor %}
     {% endfor %}
+
+    <a href="/completed">completed</a>
 </nav>
 
 {% endblock %}

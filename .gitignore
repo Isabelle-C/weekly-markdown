@@ -1,10 +1,5 @@
 __pycache__/
 .coverage
 
-# Configs
-annotate.yaml
-append.yaml
-archive.yaml
-create.yaml
-find.yaml
-years.yml
+# db file
+tasks.db

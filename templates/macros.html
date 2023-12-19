@@ -1,0 +1,42 @@
+{% macro render_task(task, now) %}
+    <tr>
+        <td>
+            <input type="checkbox" class="task-checkbox" data-task-id="{{ task.id }}" {% if task.done %}checked{% endif %}>
+        </td>
+        <td>{{ task.task_name }}</td>
+        <td>{{ task.tag }}</td>
+        <td>{{ task.priority }}</td>
+        <td>{{ task.due_date.strftime('%Y-%m-%d (%a)') }}</td>
+        {% if (task.due_date.date() - now.date()).days < 0 %}
+        {% if -1*((task.due_date.date() - now.date()).days) == 1%}
+            <td> 1 day</td>
+        {% else %}
+            <td>{{ -1*((task.due_date.date() - now.date()).days) }} days</td>
+        {% endif %}
+        {% else %}
+            <td> {{task.due_date.isocalendar()[1]}} </td>
+        {% endif %}
+        <td>
+            <a href="/delete/{{task.id}}">Delete</a>
+            <br>
+            <a href="/update/{{task.id}}">Update</a>
+        </td>
+    </tr>
+{% endmacro %}
+
+{% macro render_completed_task(task) %}
+    <tr>
+        <td>
+            <input type="checkbox" class="task-checkbox" data-task-id="{{ task.id }}" {% if task.done %}checked{% endif %}>
+        </td>
+        <td>{{ task.task_name }}</td>
+        <td>{{ task.tag }}</td>
+        <td>{{ task.priority }}</td>
+        <td>{{ task.due_date.strftime('%Y-%m-%d (%a)') }}</td>
+        <td>
+            <a href="/delete/{{task.id}}">Delete</a>
+            <br>
+            <a href="/update/{{task.id}}">Update</a>
+        </td>
+    </tr>
+{% endmacro %}

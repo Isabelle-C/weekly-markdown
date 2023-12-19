@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% from "macros.html" import render_completed_task with context %}
+
+{% block body %}
+<div class="content">
+    <button id="nav-toggle">Toggle Nav</button>
+    <button id="home"> Home </button>
+
+    {% if tasks|length < 1 %}
+        <h4 style="text-align: center">There are no completed tasks.</h4>
+    {% else %}
+        {% set ns = namespace(displayed_week=0) %}
+
+        {% for task in tasks %}
+            {% if task_week != ns.displayed_week %}
+                
+                {% if ns.displayed_week != 0 %}
+                    </table>
+                {% endif %}
+
+                <h2> {{ task_year }} Week {{ task_week }}</h2>
+
+                <table>
+                    <tr>
+                        <th>Done?</th>
+                        <th>Task Name</th>
+                        <th>Tag</th>
+                        <th>Priority</th>
+                        <th>Due Date</th>
+                    </tr>
+                    {{ render_completed_task(task) }}
+                        
+                    {% set ns.displayed_week = task_week %}
+                {% else %}
+                    {{ render_completed_task(task) }}
+                {% endif %}
+        {% endfor %}
+    {% endif %}
+
+<nav>
+    {% for year in range(now.year, now.year + 2) %}
+        {% for week in range(1, 53) %}
+            {% if (year, week) in task_weeks %}
+                <a href="/week/{{ year }}/{{ week }}">Week {{ week }}, {{ year }}</a>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+
+    <a href="/completed">completed</a>
+</nav>
+
+{% endblock %}

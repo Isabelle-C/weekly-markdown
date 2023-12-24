@@ -1,7 +1,7 @@
-from flask import Flask, render_template, url_for, request, redirect, session, g, flash
+from flask import Flask, render_template, url_for, request, redirect, session, g, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta, MO
 
 from sqlalchemy import inspect, extract
@@ -18,6 +18,7 @@ class Todo(db.Model):
     
     task_name = db.Column(db.String(200), nullable=False)
     tag = db.Column(db.String(200), nullable=True)
+    frequency = db.Column(db.String(200), default='Once')
     due_date = db.Column(db.DateTime, nullable=True)
     priority = db.Column(db.Integer, nullable=True)
     done=db.Column(db.Boolean, default=False)
@@ -78,6 +79,7 @@ def index():
         tag = request.form['tag']
         due_date_string = request.form['due_date']
         priority = request.form['priority']
+        frequency = request.form['frequency']
 
         # Convert due_date_string to a datetime object
         due_date = datetime.strptime(due_date_string, "%Y-%m-%d")
@@ -85,10 +87,34 @@ def index():
         new_task = Todo(task_name=task_name
                         , tag=tag
                         , due_date=due_date
-                        , priority=priority)
+                        , priority=priority
+                        , frequency=frequency)
 
         try:
-            db.session.add(new_task)
+            if frequency == 'once':
+                db.session.add(new_task)
+            else:
+                if frequency == 'daily':
+                    delta = timedelta(days=1)
+                elif frequency == 'weekly':
+                    delta = timedelta(days=7)
+                elif frequency == 'yearly':
+                    delta = timedelta(weeks=52)
+
+                end_date = datetime.now() + timedelta(weeks=52)  # one year from now
+                while due_date < end_date:
+                    new_task = Todo(task_name=task_name
+                        , tag=tag
+                        , due_date=due_date
+                        , priority=priority
+                        , frequency=frequency)
+                    db.session.add(new_task)
+                    if frequency == 'monthly':
+                        current_month = due_date.month
+                        due_date = due_date.replace(month=current_month + 1)
+                    else:
+                        due_date += delta
+
             db.session.commit()
             return redirect('/')
         except:

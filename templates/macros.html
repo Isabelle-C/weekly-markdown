@@ -14,7 +14,7 @@
             <td>{{ -1*((task.due_date.date() - now.date()).days) }} days</td>
         {% endif %}
         {% else %}
-            <td> {{task.due_date.isocalendar()[1]}} </td>
+            <td>  </td>
         {% endif %}
         <td>
             <a href="/delete/{{task.id}}">Delete</a>

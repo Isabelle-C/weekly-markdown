@@ -87,7 +87,6 @@ nav {
     height: 100%;
     background-color: #1E90FF; /* Sky blue nav bar */
     color: #fff;
-    padding: 20px;
     overflow: auto;
     transition: left 0.5s; /* Add transition effect */
 }
@@ -95,6 +94,7 @@ nav {
 nav a {
     color: #fff;
     text-decoration: none;
+    text-align: center;
     display: block;
     margin-bottom: 10px;
 }

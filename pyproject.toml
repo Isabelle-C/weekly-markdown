@@ -17,6 +17,7 @@ MarkupSafe = "*"
 SQLAlchemy = "*"
 Werkzeug = "*"
 pytz = "^2023.3.post1"
+python-dateutil = "^2.8.2"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.14.1"

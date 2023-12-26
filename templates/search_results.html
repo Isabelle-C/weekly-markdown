@@ -7,7 +7,7 @@
     <button id="home"> Home </button>
 
     {% if tasks|length < 1 %}
-        <h4 style="text-align: center">There are no completed tasks.</h4>
+        <h4 style="text-align: center">There are no related tasks.</h4>
     {% else %}
         {% set ns = namespace(displayed_week=0) %}
 

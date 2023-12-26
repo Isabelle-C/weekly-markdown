@@ -8,27 +8,48 @@
 {% block body %}
 <div class="content">
     <button id="nav-toggle">Toggle Nav</button>
-    <form action="/clear_database" method="POST">
+    <br>
+    <button id="home">Home</button>
+    <br>
+    <form action="/clear_database" method="POST" onsubmit="return confirm('Are you sure you want to clear the database? This action cannot be undone.');">
         <button id="clear-db" type="submit">Clear Database</button>
     </form>
+    <button id="openSearch">Open Search</button>
 
-    <h1 style="text-align: center">Isabelle's Workspace!</h1>
-
-    <form method="POST" action="/set_timezone">
-        <select name="timezone">
-            {% for tz in timezones %}
-            <option value="{{ tz }}">{{ tz }}</option>
+<div id="searchForm" style="display: none;">
+        <button id="closeSearch">Close</button>
+        <br>
+        
+        <form action="/search" method="GET">
+        <input type="text" name="task_name" placeholder="Task Name">
+        <input list="tags" name="tag" placeholder="Tag" id="tag">
+        <datalist id="tags">
+            {% for tag in unique_tags %}
+                <option value="{{ tag[0] }}">{{ tag[0] }}</option>
             {% endfor %}
+        </datalist>
+        <input type="date" name="due_date" placeholder="Due Date">
+        <select name="priority">
+            <option value="">Any Priority</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
         </select>
-        <input type="submit" value="Set Timezone">
+        <select name="frequency">
+            <option value="">Any Frequency</option>
+            <option value="once">Once</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+        <br>
+        <input type="submit" value="Search">
     </form>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <div class="alert alert-success">
-            {{ messages[0] }}
-        </div>
-    {% endif %}
-    {% endwith %}
+</div>
+
+    <h2 id="clock" style="text-align: center"></h2>
 
     <div class="form">
         <form action="/" method="POST">
@@ -72,22 +93,30 @@
         <h4 style="text-align: center">There are no tasks. Create one below!</h4>
     {% else %}
         {% set current_week = now.isocalendar()[1] %}
-        {% set next_week = current_week + 1 %}
-
         {% set current_year = now.year %}
+        
+        {% if current_week == 52 %}
+            {% set next_week = 1 %}
+            {% set next_year = current_year + 1 %}
+        {% else %}
+            {% set next_week = current_week + 1 %}
+            {% set next_year = current_year %}
+        {% endif %}
 
         {% set ns = namespace(displayed_week=0) %}
 
         {% for task in tasks %}
+
             {% set task_week = task.due_date.isocalendar()[1] %}
             {% set task_year = task.due_date.date().year %}
+
             {% if (not task.done) %}
                 {% if task_week != ns.displayed_week %}
                     {% if ns.displayed_week != 0 %}
                         </table>
                     {% endif %}
 
-                    {% if task_year <= current_year and (task_week<=current_week or task_week==next_week)%}
+                    {% if (task_year <= current_year and task_week<=current_week) or (task_year==next_year and task_week==next_week) %}
 
                     <h2> {{ task_year }} Week {{ task_week }}</h2>
 
@@ -105,7 +134,9 @@
                         
                     {% set ns.displayed_week = task_week %}
                 {% else %}
-                    {{ render_task(task, now) }}
+                    {% if (task_year <= current_year and task_week<=current_week) or (task_year==next_year and task_week==next_week) %}
+                        {{ render_task(task, now) }}
+                    {% endif %}
                 {% endif %}
             {% endif %}
         {% endfor %}

@@ -16,8 +16,6 @@
         });
     });
     </script>
-
-    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     {% block body %}{% endblock %}
@@ -35,6 +33,25 @@
         window.location.href = '/';
     });
 
+    document.getElementById('openSearch').addEventListener('click', function() {
+        document.getElementById('searchForm').style.display = 'block';
+    });
+
+    document.getElementById('closeSearch').addEventListener('click', function() {
+        document.getElementById('searchForm').style.display = 'none';
+    });
+
     </script>
+
+    <script>
+        function updateClock() {
+            var now = new Date();
+            var formattedNow = now.toLocaleString(undefined, {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'});
+            document.getElementById('clock').textContent = formattedNow;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+
 </body>
 </html>

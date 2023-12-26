@@ -9,6 +9,7 @@
     <h1 style="text-align: center">Update Task</h1>
 
     <button id="nav-toggle">Toggle Nav</button>
+    <button id="home">Home</button>
 
     <div class="form">
         <form action="/update/{{task.id}}" method="POST">
@@ -33,6 +34,15 @@
                 <option value="medium" {% if task.priority == 'medium' %} selected {% endif %}>Medium</option>
                 <option value="high" {% if task.priority == 'high' %} selected {% endif %}>High</option>
                 <option value="urgent" {% if task.priority == 'urgent' %} selected {% endif %}>Urgent</option>
+            </select>
+            <br>
+            <label for="frequency">Frequency</label>
+            <select name="frequency" id="frequency">
+                <option value="once" {% if task.frequency == 'once' %} selected {% endif %} > Once </option>
+                <option value="daily" {% if task.frequency == 'daily' %} selected {% endif %}>Daily</option>
+                <option value="weekly" {% if task.frequency == 'weekly' %} selected {% endif %}>Weekly</option>
+                <option value="monthly" {% if task.frequency == 'monthly' %} selected {% endif %}>Monthly</option>
+                <option value="yearly" {% if task.frequency == 'yearly' %} selected {% endif %}>Yearly</option>
             </select>
             <br>
             <input type="submit" value="Update">

@@ -2,6 +2,7 @@ from flask import Flask, render_template, url_for, request, redirect, session, g
 from flask_sqlalchemy import SQLAlchemy
 
 from datetime import datetime, timedelta
+from dateutil.tz import tzlocal
 from dateutil.relativedelta import relativedelta, MO
 
 from sqlalchemy import inspect, extract
@@ -14,7 +15,7 @@ db = SQLAlchemy(app)
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, default= datetime.now(tzlocal()))
     
     task_name = db.Column(db.String(200), nullable=False)
     tag = db.Column(db.String(200), nullable=True)
@@ -27,24 +28,45 @@ class Todo(db.Model):
     def __repr__(self):
         return '<Task %r>' % self.id
 
-@app.before_request
-def load_timezone():
-    g.timezone = session.get('timezone', 'UTC') 
+from flask import request
+
+@app.route('/search', methods=['GET'])
+def search():
+    task_name = request.args.get('task_name', '')
+    tag = request.args.get('tag', '')
+    due_date = request.args.get('due_date', '')
+    priority = request.args.get('priority', '')
+    frequency = request.args.get('frequency', '')
+
+    # Convert due_date to a datetime object
+    if due_date:
+        due_date = datetime.strptime(due_date, "%Y-%m-%d")
+
+    # Build the query
+    query = Todo.query
+    if task_name:
+        query = query.filter(Todo.task_name.like(f'%{task_name}%'))
+    if tag:
+        query = query.filter(Todo.tag == tag)
+    if due_date:
+        query = query.filter(Todo.due_date == due_date)
+    if priority:
+        query = query.filter(Todo.priority == priority)
+    if frequency:
+        query = query.filter(Todo.frequency == frequency)
+
+    # Execute the query and get the results
+    tasks = query.all()
+    now = datetime.now(tzlocal())
+
+    return render_template('search_results.html', tasks=tasks, now=now)
 
 @app.route('/update_done/<int:task_id>', methods=['POST'])
 def update_done(task_id):
     task = Todo.query.get_or_404(task_id)
     task.done = request.form.get('done') == 'true'
     if task.done:
-        # Get the current time in UTC
-        utc_now = datetime.utcnow()
-
-        # Specify the timezone you want (for example, 'America/New_York')
-        desired_timezone = pytz.timezone(g.timezone)
-
-        # Convert the UTC time to the desired timezone
-        now = utc_now.replace(tzinfo=pytz.utc).astimezone(desired_timezone)
-        task.done_timestamp = now
+        task.done_timestamp = datetime.now(tzlocal())
     else:
         task.done_timestamp = None
     db.session.commit()
@@ -62,14 +84,7 @@ def clear_database():
 @app.route('/completed')
 def completed():
     tasks = Todo.query.filter(Todo.done == True).order_by(Todo.due_date).all()
-    # Get the current time in UTC
-    utc_now = datetime.utcnow()
-
-    # Specify the timezone you want (for example, 'America/New_York')
-    desired_timezone = pytz.timezone(g.timezone)
-
-    # Convert the UTC time to the desired timezone
-    now = utc_now.replace(tzinfo=pytz.utc).astimezone(desired_timezone)
+    now = datetime.now(tzlocal())
     return render_template('completed.html', tasks=tasks, now=now)
 
 @app.route('/', methods=['POST', 'GET'])
@@ -101,7 +116,7 @@ def index():
                 elif frequency == 'yearly':
                     delta = timedelta(weeks=52)
 
-                end_date = datetime.now() + timedelta(weeks=52)  # one year from now
+                end_date = due_date + timedelta(weeks=52)  # one year from now
                 while due_date < end_date:
                     new_task = Todo(task_name=task_name
                         , tag=tag
@@ -110,54 +125,30 @@ def index():
                         , frequency=frequency)
                     db.session.add(new_task)
                     if frequency == 'monthly':
-                        current_month = due_date.month
-                        due_date = due_date.replace(month=current_month + 1)
+                        due_date += relativedelta(months=1)
                     else:
                         due_date += delta
 
             db.session.commit()
             return redirect('/')
-        except:
-            return 'There was an issue adding your task'
-
+        except Exception as e:
+            return 'There was an issue adding your task: ' + str(e)
     else:
         tasks = Todo.query.filter(Todo.done == False).order_by(Todo.due_date).all()
         unique_tags = db.session.query(Todo.tag).distinct().all()
 
-        # Get the current time in UTC
-        utc_now = datetime.utcnow()
-
-        # Specify the timezone you want (for example, 'America/New_York')
-        desired_timezone = pytz.timezone(g.timezone)
-
-        # Convert the UTC time to the desired timezone
-        now = utc_now.replace(tzinfo=pytz.utc).astimezone(desired_timezone)
-
         task_weeks = {(task.due_date.date().year, task.due_date.isocalendar()[1]) for task in tasks}
-        timezones = pytz.all_timezones
+        
+        now = datetime.now(tzlocal())
 
-        return render_template('index.html', tasks=tasks, unique_tags=unique_tags, now=now, task_weeks=task_weeks, timezones=timezones)
-    
-@app.route('/set_timezone', methods=['POST'])
-def set_timezone():
-    selected_timezone = request.form.get('timezone')
-    session['timezone'] = selected_timezone  # Store the selected timezone in the session
-    flash('Timezone set successfully')  # Flash a success message
-    return redirect('/')  # Redirect back to the index page
+        return render_template('index.html', tasks=tasks, unique_tags=unique_tags, now=now, task_weeks=task_weeks)
 
 @app.route('/week/<int:year>/<int:week>')
 def week(year, week):
     start = datetime.strptime(f'{year}-W{int(week )}-1', "%Y-W%W-%w").date()
     end = start + relativedelta(days=+7)
 
-    # Get the current time in UTC
-    utc_now = datetime.utcnow()
-
-    # Specify the timezone you want (for example, 'America/New_York')
-    desired_timezone = pytz.timezone(g.timezone)
-
-    # Convert the UTC time to the desired timezone
-    now = utc_now.replace(tzinfo=pytz.utc).astimezone(desired_timezone)
+    now = datetime.now(tzlocal())
     
     tasks = Todo.query.filter(Todo.due_date.between(start, end)).order_by(Todo.due_date).all()
 
@@ -170,7 +161,11 @@ def delete(id):
     task_to_delete = Todo.query.get_or_404(id)
 
     try:
-        db.session.delete(task_to_delete)
+        if task_to_delete.frequency != 'once':
+            # Delete all tasks with the same name
+            Todo.query.filter(Todo.task_name == task_to_delete.task_name, Todo.frequency == task_to_delete.frequency).delete()
+        else:
+            db.session.delete(task_to_delete)
         db.session.commit()
         return redirect('/')
     except:
@@ -185,6 +180,43 @@ def update(id):
         task.tag = request.form['tag']
         task.due_date = datetime.strptime(request.form['due_date'], "%Y-%m-%d")
         task.priority = request.form['priority']
+        new_frequency = request.form['frequency']
+
+        if task.frequency != new_frequency:
+            # Delete all tasks with the same name
+            Todo.query.filter(Todo.task_name == task.task_name, Todo.frequency == task.frequency).delete()
+
+            new_task = Todo(task_name=request.form['task_name']
+                        , tag=request.form['tag']
+                        , due_date=datetime.strptime(request.form['due_date'], "%Y-%m-%d")
+                        , priority=request.form['priority']
+                        , frequency=new_frequency)
+
+            if new_frequency == 'once':
+                db.session.add(new_task)
+            else:
+                if new_frequency == 'daily':
+                    delta = timedelta(days=1)
+                elif new_frequency == 'weekly':
+                    delta = timedelta(days=7)
+                elif new_frequency == 'yearly':
+                    delta = timedelta(weeks=52)
+
+                due_date = datetime.strptime(request.form['due_date'], "%Y-%m-%d")
+
+                end_date = due_date + timedelta(weeks=52)  # one year from now 
+                while due_date < end_date:
+                    new_task = Todo(task_name=request.form['task_name']
+                        , tag=request.form['tag']
+                        , due_date=due_date
+                        , priority=request.form['priority']
+                        , frequency=new_frequency)
+                    db.session.add(new_task)
+                    
+                    if new_frequency == 'monthly':
+                        due_date += relativedelta(months=1)
+                    else:
+                        due_date += delta
 
         try:
             db.session.commit()

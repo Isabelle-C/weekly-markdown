@@ -25,6 +25,19 @@ h1 {
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    width: 1000px;
+    height: 300px;
+}
+
+input[type="text"], input[id="tag"] {
+    width: 70%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
 }
 
 form input[type="text"], form input[type="date"], form select {
@@ -34,20 +47,22 @@ form input[type="text"], form input[type="date"], form select {
     border-radius: 5px;
     border: 1px solid #ccc;
     font-size: 16px;
+    margin: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
 }
-
 form input[type="submit"] {
-    background-color: #1E90FF; /* Sky blue button */
+    background-color: #89CFF0; /* Baby blue button */
     color: white;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-size: 20px;
+    font-family: Avenir, sans-serif;
 }
 
 form input[type="submit"]:hover {
-    background-color: #104E8B; /* Darker sky blue on hover */
+    background-color: #4682B4; /* Steel blue on hover */
 }
 
 table {
@@ -59,10 +74,11 @@ table {
 table, th, td {
     border: 1px solid #ddd;
     padding: 10px;
+    table-layout: fixed;
 }
 
 th {
-    background-color: #1E90FF; /* Sky blue header */
+    background-color: #5ac4f9; /* Light steel blue header */
     color: white;
 }
 
@@ -80,12 +96,13 @@ a:hover {
 }
 
 nav {
+
     position: fixed;
     top: 0;
     left: -200px; /* Hide the nav bar by moving it off-screen */
     width: 200px;
     height: 100%;
-    background-color: #1E90FF; /* Sky blue nav bar */
+    background-color: #f4c077; 
     color: #fff;
     overflow: auto;
     transition: left 0.5s; /* Add transition effect */
@@ -93,6 +110,7 @@ nav {
 
 nav a {
     color: #fff;
+    font-size: 22px;
     text-decoration: none;
     text-align: center;
     display: block;
@@ -100,9 +118,50 @@ nav a {
 }
 
 nav a:hover {
-    color: #ddd;
+    color: #5e4209;
 }
 
 nav.show-by-default {
     left: 0px;
+}
+
+#clock {
+    color: #333;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    margin: 0 auto;
+    width: fit-content;
+}
+
+#searchForm {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #000;
+    border-radius: 10px;
+    z-index: 1000;
+    font-family: Avenir, sans-serif;
+}
+
+button {
+    padding: 5px 10px;
+    font-size: 20px;
+    font-family: Avenir, sans-serif;
+    color: #fff;
+    background-color: #a9720c;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    align-items: center;
+    width: auto;  /* Set the width */
+    height: 40px;  /* Set the height */
+    margin: 5px; /* Add some spacing */
+}
+
+button:hover {
+    background-color: #513f07;
 }

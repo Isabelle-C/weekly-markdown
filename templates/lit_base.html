@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    {% block body %}{% endblock %}
+    <script>
+          document.getElementById('filterName').addEventListener('input', function() {
+              filterTable('paper_name', this.value);
+          });
+
+          document.getElementById('filterTag').addEventListener('input', function() {
+              filterTable('tag', this.value);
+          });
+
+      function filterTable(column, value) {
+          var rows = document.querySelector('table tbody').rows;
+
+          for (var i = 0; i < rows.length; i++) {
+              if (rows[i].cells.length > column) {
+                  var cell = rows[i].cells[column];
+                  var text = cell.textContent || cell.innerText;
+                  rows[i].style.display = text.indexOf(value) > -1 ? '' : 'none';
+              }
+          }
+      }
+
+
+    document.addEventListener('input', function(e) {
+        if (e.target && (e.target.id === 'filterName' || e.target.id === 'filterTag')) {
+            filterTable(0, e.target.value); // Assuming name is in the first column
+            filterTable(1, e.target.value); // Assuming tag is in the second column
+        }
+    });
+
+    document.getElementById('home').addEventListener('click', function() {
+        window.location.href = '/';
+    });
+
+        document.getElementById('nav-toggle').addEventListener('click', function() {
+        var nav = document.querySelector('nav');
+        if (nav.style.left === '0px') {
+            nav.style.left = '-200px';
+        } else {
+            nav.style.left = '0px';
+        }
+    });
+    </script>
+  </body>
+</html>

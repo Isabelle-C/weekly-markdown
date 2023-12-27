@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% from "macros.html" import render_completed_task with context %}
+{% from "macros.html" import nav_bar %}
 
 {% block body %}
 <div class="content">
@@ -40,16 +41,6 @@
         {% endfor %}
     {% endif %}
 
-<nav>
-    {% for year in range(now.year, now.year + 2) %}
-        {% for week in range(1, 53) %}
-            {% if (year, week) in task_weeks %}
-                <a href="/week/{{ year }}/{{ week }}">Week {{ week }}, {{ year }}</a>
-            {% endif %}
-        {% endfor %}
-    {% endfor %}
-
-    <a href="/completed">completed</a>
-</nav>
+{{ nav_bar(task_weeks, now) }}
 
 {% endblock %}

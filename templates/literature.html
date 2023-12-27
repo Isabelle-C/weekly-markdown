@@ -1,0 +1,88 @@
+{% extends 'lit_base.html' %} 
+
+{% from "macros.html" import nav_bar %} 
+
+{% block head %}
+<title>Literature</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+  <button id="nav-toggle">Toggle Nav</button>
+  <br />
+  <button id="home">Home</button>
+  <br />
+  <form
+    action="/clear_database2"
+    method="POST"
+    onsubmit="return confirm('Are you sure you want to clear the database? This action cannot be undone.');"
+  >
+    <button id="clear-db" type="submit">Clear Database</button>
+  </form>
+
+  <div class="form">
+    <form action="/literature" method="POST">
+      <label for="paper_name">Paper Name</label>
+      <input type="text" name="paper_name" id="paper_name" />
+      <br />
+      <label for="tag">Tag</label>
+      <input list="tags" name="tag" id="tag" />
+      <datalist id="tags">
+        {% for tag in unique_tags %}
+        <option value="{{ tag[0] }}">{{ tag[0] }}</option>
+        {% endfor %}
+      </datalist>
+      <br />
+      <label for="original_pdf"> Original PDF </label>
+      <input type="text" name="original_pdf" id="original_pdf" />
+      <br />
+      <label for="notes"> Notes </label>
+      <input type="text" name="notes" id="notes" />
+      <br />
+      <input type="submit" value="Add Paper" />
+    </form>
+  </div>
+
+  <br />
+  <table>
+    <thead>
+      <tr>
+        <th>
+          Paper Name
+          <br />
+          <input type="text" id="filterName" placeholder="Filter by Name" />
+        </th>
+        <th>
+          Tag
+          <br />
+          <input type="text" id="filterTag" placeholder="Filter by Tag" />
+        </th>
+        <th> Date Added </th>
+        <th>Original PDF</th>
+        <th>Notes</th>
+        <th> </th>
+        <!-- Add other headers as needed -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for lit in lits %}
+        <tr>
+            <td>{{ lit.paper_name }}</td>
+            <td>{{ lit.tag }}</td>
+            <td>{{ lit.date_added.strftime('%Y-%m-%d') }}</td>
+            <td>{{ lit.original_pdf }}</td>
+            <td>{{ lit.notes }}</td>
+            <td>
+                <a href="/delete_lit/{{lit.id}}">Delete</a>
+                <br>
+                <a href="/update_lit/{{lit.id}}">Update</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  {{ nav_bar(task_weeks, now) }}
+  
+  {% endblock %}
+</div>

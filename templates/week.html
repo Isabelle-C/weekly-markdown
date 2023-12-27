@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from "macros.html" import nav_bar %}
 
 {% block head %}
 <title>Task Master</title>
@@ -54,14 +55,6 @@
 
 </div>
 
-<nav class="show-by-default">
-    {% for year in range(now.year, now.year + 2) %}
-        {% for week in range(1, 53) %}
-            {% if (year, week) in task_weeks %}
-                <a href="/week/{{ year }}/{{ week }}">Week {{ week }}, {{ year }}</a>
-            {% endif %}
-        {% endfor %}
-    {% endfor %}
-</nav>
+{{ nav_bar(task_weeks, now) }}
 
 {% endblock %}

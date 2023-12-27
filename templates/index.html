@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% from "macros.html" import render_task with context %}
+{% from "macros.html" import nav_bar %}
+
 
 {% block head %}
 <title>Isabelle's Workspace!</title>
@@ -16,40 +18,40 @@
     </form>
     <button id="openSearch">Open Search</button>
 
-<div id="searchForm" style="display: none;">
-        <button id="closeSearch">Close</button>
-        <br>
-        
-        <form action="/search" method="GET">
-        <input type="text" name="task_name" placeholder="Task Name">
-        <input list="tags" name="tag" placeholder="Tag" id="tag">
-        <datalist id="tags">
-            {% for tag in unique_tags %}
-                <option value="{{ tag[0] }}">{{ tag[0] }}</option>
-            {% endfor %}
-        </datalist>
-        <input type="date" name="due_date" placeholder="Due Date">
-        <select name="priority">
-            <option value="">Any Priority</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="urgent">Urgent</option>
-        </select>
-        <select name="frequency">
-            <option value="">Any Frequency</option>
-            <option value="once">Once</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-        </select>
-        <br>
-        <input type="submit" value="Search">
-    </form>
-</div>
-
     <h2 id="clock" style="text-align: center"></h2>
+
+    <div id="searchForm" style="display: none;">
+            <button id="closeSearch">Close</button>
+            <br>
+            
+            <form action="/search" method="GET">
+            <input type="text" name="task_name" placeholder="Task Name">
+            <input list="tags" name="tag" placeholder="Tag" id="tag">
+            <datalist id="tags">
+                {% for tag in unique_tags %}
+                    <option value="{{ tag[0] }}">{{ tag[0] }}</option>
+                {% endfor %}
+            </datalist>
+            <input type="date" name="due_date" placeholder="Due Date">
+            <select name="priority">
+                <option value="">Any Priority</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+            </select>
+            <select name="frequency">
+                <option value="">Any Frequency</option>
+                <option value="once">Once</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+            </select>
+            <br>
+            <input type="submit" value="Search">
+        </form>
+    </div>
 
     <div class="form">
         <form action="/" method="POST">
@@ -142,16 +144,6 @@
         {% endfor %}
     {% endif %}
 
-<nav>
-    {% for year in range(now.year, now.year + 2) %}
-        {% for week in range(1, 53) %}
-            {% if (year, week) in task_weeks %}
-                <a href="/week/{{ year }}/{{ week }}">Week {{ week }}, {{ year }}</a>
-            {% endif %}
-        {% endfor %}
-    {% endfor %}
-
-    <a href="/completed">completed</a>
-</nav>
+{{ nav_bar(task_weeks, now) }}
 
 {% endblock %}

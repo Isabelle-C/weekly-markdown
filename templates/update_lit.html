@@ -14,10 +14,10 @@
    <div class="form">
     <form action="/update_lit/{{lit.id}}" method="POST">
       <label for="paper_name">Paper Name</label>
-      <input type="text" name="paper_name" id="paper_name" />
+      <input type="text" name="paper_name" id="paper_name" value = {{lit.paper_name}}/>
       <br />
       <label for="tag">Tag</label>
-      <input list="tags" name="tag" id="tag" />
+      <input list="tags" name="tag" id="tag" value="{{lit.tag}}"/>
       <datalist id="tags">
         {% for tag in unique_tags %}
         <option value="{{ tag[0] }}">{{ tag[0] }}</option>
@@ -25,10 +25,10 @@
       </datalist>
       <br />
       <label for="original_pdf"> Original PDF </label>
-      <input type="text" name="original_pdf" id="original_pdf" />
+      <input type="text" name="original_pdf" id="original_pdf" value="{{lit.original_pdf}}"/>
       <br />
       <label for="notes"> Notes </label>
-      <input type="text" name="notes" id="notes" />
+      <input type="text" name="notes" id="notes" value="{{lit.notes}}"/>
       <br />
       <input type="submit" value="Update" />
     </form>

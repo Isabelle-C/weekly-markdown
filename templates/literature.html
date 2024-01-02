@@ -70,7 +70,11 @@
             <td>{{ lit.paper_name }}</td>
             <td>{{ lit.tag }}</td>
             <td>{{ lit.date_added.strftime('%Y-%m-%d') }}</td>
-            <td>{{ lit.original_pdf }}</td>
+            {% if lit.original_pdf == "" %}
+            <td> </td>
+            {% else %}
+            <td><a href="{{ lit.original_pdf }}" target="_blank" > link </a></td>
+            {% endif %}
             <td>{{ lit.notes }}</td>
             <td>
                 <a href="/delete_lit/{{lit.id}}">Delete</a>

@@ -6,7 +6,7 @@ db = SQLAlchemy()
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date_created = db.Column(db.DateTime, default= datetime.now(tzlocal()))
+    date_created = db.Column(db.DateTime)
     
     task_name = db.Column(db.String(200), nullable=False)
     tag = db.Column(db.String(200), nullable=True)
@@ -22,8 +22,17 @@ class Todo(db.Model):
 class Lit(db.Model):
     __bind_key__ = 'lit'
     id = db.Column(db.Integer, primary_key=True)
-    date_added = db.Column(db.DateTime, default= datetime.now(tzlocal()))
+    date_added = db.Column(db.DateTime)
     paper_name = db.Column(db.String(200), nullable=True)
     tag = db.Column(db.String(200), nullable=True)
     original_pdf = db.Column(db.String(200), nullable=True)
     notes = db.Column(db.String(200), nullable=True)
+
+class Book(db.Model):
+    __bind_key__ = 'book'
+    id = db.Column(db.Integer, primary_key=True)
+    book_name = db.Column(db.String(200), nullable=True)
+    book_language = db.Column(db.String(200), nullable=True)
+    book_author = db.Column(db.String(200), nullable=True)
+    book_plot=db.Column(db.String(200), nullable=True)
+    book_genre=db.Column(db.String(200), nullable=True)

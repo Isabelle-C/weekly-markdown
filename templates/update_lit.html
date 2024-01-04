@@ -14,7 +14,7 @@
    <div class="form">
     <form action="/update_lit/{{lit.id}}" method="POST">
       <label for="paper_name">Paper Name</label>
-      <input type="text" name="paper_name" id="paper_name" value = {{lit.paper_name}}/>
+      <input type="text" name="paper_name" id="paper_name" value="{{lit.paper_name|safe}}"/>
       <br />
       <label for="tag">Tag</label>
       <input list="tags" name="tag" id="tag" value="{{lit.tag}}"/>
@@ -30,6 +30,7 @@
       <label for="notes"> Notes </label>
       <input type="text" name="notes" id="notes" value="{{lit.notes}}"/>
       <br />
+      <button type="button" onclick="window.location.href='/literature'">Cancel</button>
       <input type="submit" value="Update" />
     </form>
   </div>

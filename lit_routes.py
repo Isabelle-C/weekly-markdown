@@ -30,7 +30,8 @@ def literature():
         new_lit = Lit(paper_name=paper_name
                        , tag=tag
                        , original_pdf=original_pdf
-                       , notes=notes)
+                       , notes=notes
+                       , date_added=now)
         
         db.session.add(new_lit)
         db.session.commit()

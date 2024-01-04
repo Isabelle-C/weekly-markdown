@@ -24,7 +24,8 @@ def index():
                         , tag=tag
                         , due_date=due_date
                         , priority=priority
-                        , frequency=frequency)
+                        , frequency=frequency
+                        , date_created=datetime.now(tzlocal()))
 
         try:
             if frequency == 'once':

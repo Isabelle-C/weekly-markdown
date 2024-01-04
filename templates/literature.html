@@ -75,7 +75,12 @@
             {% else %}
             <td><a href="{{ lit.original_pdf }}" target="_blank" > link </a></td>
             {% endif %}
-            <td>{{ lit.notes }}</td>
+            {% if lit.notes == "" %}
+            <td> </td>
+            {% else %}
+            <td><a href="{{ lit.notes }}" target="_blank" > notes link </a></td>
+            {% endif %}
+            </td>
             <td>
                 <a href="/delete_lit/{{lit.id}}">Delete</a>
                 <br>

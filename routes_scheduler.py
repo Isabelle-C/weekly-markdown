@@ -188,6 +188,6 @@ def get_events():
                     else:
                         end_d = event_end_date.strftime('%I:%M %p').lstrip("0")
 
-                        events_to_write.append(f"- {start_time_day} {start_time_time} - {end_d}")
+                        events_to_write.append(f"{start_time_day} {start_time_time} - {end_d}")
 
         return render_template('scheduler.html', events_to_write=events_to_write, calender_ids=calendars, timezones=timezones)

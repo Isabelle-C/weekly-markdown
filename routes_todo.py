@@ -132,7 +132,7 @@ def search():
         query = query.filter(Todo.frequency == frequency)
 
     # Execute the query and get the results
-    tasks = query.all()
+    tasks = query.order_by(Todo.due_date).all()
     now = datetime.now(tzlocal())
 
     return render_template('search_results.html', tasks=tasks, now=now)

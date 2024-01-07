@@ -18,6 +18,20 @@ window.onload = function() {
     var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     document.getElementById('time_zone').value = timezone;
 }
+
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+        var nav = document.querySelector('nav');
+        if (nav.style.left === '0px') {
+            nav.style.left = '-200px';
+        } else {
+            nav.style.left = '0px';
+        }
+    });
+    
+    document.getElementById('home').addEventListener('click', function() {
+        window.location.href = '/';
+    });
+    
 </script>
 
 

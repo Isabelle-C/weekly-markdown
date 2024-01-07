@@ -5,5 +5,11 @@ __pycache__/
 *.db
 
 # static files
-*/papers
-*/configs
+static/papers/*
+static/configs/*
+
+!.gitignore
+
+# working files
+books.html
+books_routes.py

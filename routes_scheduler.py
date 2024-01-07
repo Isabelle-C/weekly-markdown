@@ -6,6 +6,8 @@ import datetime
 import dateutil.parser
 import pytz
 from pytz import timezone
+import tzlocal
+from tzlocal import get_localzone
 import os.path
 
 from google.auth.transport.requests import Request
@@ -28,6 +30,43 @@ def parse_date(date, convert_timezone):
         return parsed_date.astimezone(timezone(convert_timezone))
 
     return parsed_date
+
+def get_events_today(service):
+    
+
+    # Get the current local timezone of the system
+    local_timezone = get_localzone()
+
+    # Example datetime in UTC
+    utc_time = datetime.datetime.now(datetime.timezone.utc)
+
+    # Convert to the local system timezone
+    local_time = utc_time.astimezone(local_timezone)
+    
+    # Get the start of the day in the local timezone
+    start_of_day = local_time.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_of_day = local_time.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    events_result = service.events().list(calendarId='isabellechen2023@u.northwestern.edu', timeMin=start_of_day.isoformat(), timeMax=end_of_day.isoformat(), singleEvents=True,orderBy='startTime').execute()
+
+    events = events_result.get('items', [])
+    event_list = []
+
+    if not events:
+        return event_list
+
+    for event in events:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        end = event['end'].get('dateTime', event['end'].get('date'))
+
+        start=dateutil.parser.isoparse(start)
+        end=dateutil.parser.isoparse(end)
+
+        event_summary = event.get('summary', 'No Title')
+        event_list.append(f"{event_summary} {start.astimezone(local_timezone).strftime('%I:%M %p').lstrip('0')} - {end.astimezone(local_timezone).strftime('%I:%M %p').lstrip('0')}")
+
+    return event_list
+
 
 
 @scheduler.route('/scheduler_home', methods=['GET'])
@@ -54,7 +93,9 @@ def scheduler_home():
         
         timezones = pytz.all_timezones
 
-        return render_template('scheduler.html', calender_ids=calendars, timezones=timezones)
+        now_input = datetime.datetime.now(get_localzone())
+
+        return render_template('scheduler.html', calender_ids=calendars, timezones=timezones,events_today=get_events_today(service), now=now_input )
 
 @scheduler.route('/authorize')
 def authorize():
@@ -120,7 +161,6 @@ def oauth2callback():
 
     return 'Credentials successfully fetched!'
 
-
 @scheduler.route('/get_events', methods=['GET'])
 def get_events():
     if not os.path.exists(TOKEN_FILEPATH):
@@ -169,7 +209,7 @@ def get_events():
 
         events = events_result.get('items', [])
         for event in events:
-            if event['summary'] == event_name:
+            if event_name in event['summary']:
                 start = event['start'].get('dateTime', event['start'].get('date'))
                 end = event['end'].get('dateTime', event['end'].get('date'))
                     
@@ -190,4 +230,6 @@ def get_events():
 
                         events_to_write.append(f"{start_time_day} {start_time_time} - {end_d}")
 
-        return render_template('scheduler.html', events_to_write=events_to_write, calender_ids=calendars, timezones=timezones)
+        now_input = datetime.datetime.now(get_localzone())
+
+        return render_template('scheduler.html', events_to_write=events_to_write, calender_ids=calendars, timezones=timezones, now=now_input)

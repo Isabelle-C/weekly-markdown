@@ -44,6 +44,18 @@
     </form>
   </div>
 
+    <h2> Today's Events</h2>
+    {% if events_today == [] %}
+    <h3>No Events Found</h3>
+    {% else %}
+    <ul>
+    {% for event in events_today %}
+        <li>{{ event | safe}}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2> Searching Events below:</h2>
     {% if events_to_write == [] %}
 
     <h3>No Events Found</h3>
@@ -57,6 +69,8 @@
     </ul>
 
     {% endif %}
+
+{{ nav_bar(task_weeks, now) }}
 
 </div>
 
